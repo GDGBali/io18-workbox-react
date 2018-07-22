@@ -44,10 +44,10 @@ class HomeContainer extends Component {
 
   renderRestaurants = () => {
     const { tabValue } = this.state;
-    const { filteredRestaurants, favorites } = this.props;
+    const { filteredRestaurants, favorites, history } = this.props;
     const restaurants = tabValue === 0 ? filteredRestaurants : favorites;
 
-    return <RestaurantCard restaurants={restaurants} />;
+    return <RestaurantCard restaurants={restaurants} history={history} />;
   };
 
   render() {
@@ -94,7 +94,7 @@ class HomeContainer extends Component {
         )}
         <Grid container spacing={16} className={classes.root} justify="center">
           {isFetching && 'Loading...'}
-          {!isFetching && this.renderRestaurants(classes)}
+          {!isFetching && this.renderRestaurants()}
         </Grid>
       </div>
     );

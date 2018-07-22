@@ -1,7 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
-import { Link } from 'react-router-dom';
 import Grid from '@material-ui/core/Grid';
 import { withStyles } from '@material-ui/core/styles';
 import GridListTile from '@material-ui/core/GridListTile';
@@ -21,14 +20,21 @@ const styles = () => ({
 const onToggleFavourite = (dispatch, restaurantId, is_favorite) =>
   dispatch(toggleFavourite(restaurantId, !is_favorite));
 
-const RestaurantCard = ({ restaurants, dispatch, classes }) => (
+const onImageClick = (id, history) => {
+  history.push(`restaurants/${id}`);
+};
+
+const RestaurantCard = ({ restaurants, dispatch, classes, history }) => (
   <Grid item xs={12} sm={8}>
     <GridList cellHeight={180}>
       {restaurants.map(({ id, name, address, is_favorite }) => (
         <GridListTile key={id}>
-          <Link to={`restaurants/${id}`}>
-            <img src={`/images/${id}.jpg`} alt="" />
-          </Link>
+          <img
+            src={`/images/${id}.jpg`}
+            alt=""
+            onClick={() => onImageClick(id, history)}
+            style={{ cursor: 'pointer' }}
+          />
           <GridListTileBar
             title={name}
             subtitle={address}
