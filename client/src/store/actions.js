@@ -1,6 +1,20 @@
 import shuffle from 'lodash/shuffle';
+import localforage from 'localforage';
 
 const BASE_URL = 'http://localhost:1337';
+
+const dispatchReceive = (dispatch, restaurants) =>
+  dispatch({
+    type: 'RECEIVE_RESTAURANTS',
+    payload: {
+      restaurants: shuffle(
+        restaurants.map(restaurant => ({
+          ...restaurant,
+          is_favorite: restaurant.is_favorite === 'true'
+        }))
+      )
+    }
+  });
 
 export const requestRestaurant = () => dispatch => {
   dispatch({
@@ -9,19 +23,25 @@ export const requestRestaurant = () => dispatch => {
 
   return fetch(`${BASE_URL}/restaurants`)
     .then(response => response.json())
-    .then(restaurants =>
-      dispatch({
-        type: 'RECEIVE_RESTAURANTS',
-        payload: {
-          restaurants: shuffle(
-            restaurants.map(restaurant => ({
-              ...restaurant,
-              is_favorite: restaurant.is_favorite === 'true'
-            }))
-          )
+    .then(restaurantsJson => {
+      const getItems = restaurantsJson.map(restaurant =>
+        localforage.setItem(restaurant.id.toString(), restaurant)
+      );
+      return Promise.all(getItems).then(restaurants =>
+        dispatchReceive(dispatch, restaurants)
+      );
+    })
+    .catch(() => {
+      localforage.length().then(length => {
+        const promises = [];
+        for (let i = 1; i <= length; i += 1) {
+          promises.push(localforage.getItem(i.toString()));
         }
-      })
-    );
+        return Promise.all(promises).then(restaurants =>
+          dispatchReceive(dispatch, restaurants)
+        );
+      });
+    });
 };
 
 export const requestDetails = restaurantId => dispatch => {
