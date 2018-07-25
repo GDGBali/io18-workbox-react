@@ -98,19 +98,10 @@ export const toggleFavourite = (restaurantId, is_favorite) => dispatch => {
     {
       method: 'PUT'
     }
-  )
-    .then(() => {})
-    .catch(async () => {
-      const getRestaurant = await localforage.getItem(
-        `restaurants-${restaurantId}`
-      );
-      const setRestaurant = { ...getRestaurant, is_favorite };
-      localforage.setItem(`restaurants-${restaurantId}`, setRestaurant);
-    })
-    .finally(() => {
-      dispatch(toggleSnackbar({ titleText }));
-      dispatch({ type: 'TOGGLE_FAVOURITE', payload: { restaurantId } });
-    });
+  ).then(() => {
+    dispatch(toggleSnackbar({ titleText }));
+    dispatch({ type: 'TOGGLE_FAVOURITE', payload: { restaurantId } });
+  });
 };
 
 export const postReview = payload => dispatch => {
