@@ -59,6 +59,7 @@ export const requestDetails = restaurantId => dispatch => {
         reviews.map(review =>
           localforage.setItem(`reviews-${review.id}`, review)
         );
+        return reviews;
       })
       .catch(() =>
         localforage.startsWith('reviews-').then(results =>
@@ -89,39 +90,29 @@ export const toggleSnackbar = snackbar => dispatch => {
   dispatch({ type: 'TOGGLE_SNACKBAR', payload: { snackbar } });
 };
 
-export const toggleFavourite = (restaurantId, is_favorite) => dispatch => {
+export const toggleFavourite = (
+  restaurantId,
+  is_favorite
+) => async dispatch => {
   const titleText = is_favorite
     ? 'Added to favourite'
     : 'Removed from favourite';
-  return fetch(
+  await fetch(
     `${BASE_URL}/restaurants/${restaurantId}/?is_favorite=${is_favorite}`,
     {
       method: 'PUT'
     }
-  ).then(() => {
-    dispatch(toggleSnackbar({ titleText }));
-    dispatch({ type: 'TOGGLE_FAVOURITE', payload: { restaurantId } });
-  });
+  );
+  dispatch(toggleSnackbar({ titleText }));
+  dispatch({ type: 'TOGGLE_FAVOURITE', payload: { restaurantId } });
 };
 
-export const postReview = payload => dispatch => {
-  fetch(`${BASE_URL}/reviews`, {
+export const postReview = payload => async dispatch => {
+  const review = { ...payload };
+  await fetch(`${BASE_URL}/reviews`, {
     method: 'POST',
-    body: JSON.stringify({ ...payload })
-  })
-    .then(response => response.json())
-    .then(review => {
-      dispatch({ type: 'POST_REVIEW', payload: { review } });
-    })
-    .catch(() => {
-      const review = {
-        ...payload,
-        id: `temp-${new Date()}`
-      };
-      localforage.setItem(`reviews-${new Date()}`, review);
-      dispatch({ type: 'POST_REVIEW', payload: { review } });
-    })
-    .finally(() => {
-      dispatch(toggleSnackbar({ titleText: 'Review Added' }));
-    });
+    body: JSON.stringify(review)
+  });
+  dispatch({ type: 'POST_REVIEW', payload: { review } });
+  dispatch(toggleSnackbar({ titleText: 'Review Added' }));
 };

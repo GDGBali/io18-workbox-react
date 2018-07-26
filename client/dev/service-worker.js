@@ -35,3 +35,11 @@ workbox.routing.registerRoute(
   }),
   'PUT'
 );
+
+workbox.routing.registerRoute(
+  reviewsUrl,
+  workbox.strategies.networkOnly({
+    plugins: [createQueue('reviewsQueue')]
+  }),
+  'POST'
+);
